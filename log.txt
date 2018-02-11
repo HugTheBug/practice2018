@@ -1,0 +1,11 @@
+commit 4c0e576481a4bb4e79011cdce41efdf67d7640a4
+Author: Denis <playground177@gmail.com>
+Date:   Mon Feb 12 01:04:37 2018 +0300
+
+    add status.txt
+
+commit 6ada627ea32e7d431fe2b9bbdea1099cc12d2255
+Author: Denis <playground177@gmail.com>
+Date:   Mon Feb 12 01:03:39 2018 +0300
+
+    add gitignore
