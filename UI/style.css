@@ -116,6 +116,13 @@ body {
     text-align: left;
 }
 
+.dropdown-content a img {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    float: left;
+}
+
 .dropdown:hover .dropdown-content {
     display: block;
 }
