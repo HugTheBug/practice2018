@@ -57,9 +57,9 @@ let postsModule = (function (photoPosts) {
             return [];
         }
 
-        let posts = [];
+        let posts = photoPosts;
         if (filterConfig) {
-            posts = photoPosts.filter(obj => {
+            posts = posts.filter(obj => {
                 if ((filterConfig.author && obj.author !== filterConfig.author) ||
                     (filterConfig.date && obj.createdAt.getTime() !== filterConfig.date.getTime())) {
                     return false;
