@@ -66,7 +66,9 @@ let postsModule = (function (photoPosts) {
                 }
 
                 if (filterConfig.tags) {
-                    if (filterConfig.tags.every(tag => obj.hashTags.includes(tag)));
+                    if (!filterConfig.tags.every(tag => obj.hashTags.includes(tag))) {
+                        return false;
+                    }
                 }
                 return true;
             });
