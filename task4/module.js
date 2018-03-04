@@ -56,30 +56,24 @@ let postsModule = (function (photoPosts) {
         if (typeof skip !== 'number' || typeof top !== 'number' || typeof filterConfig !== 'object') {
             return [];
         }
+
         let posts = [];
-        top = Math.min(skip + top, photoPosts.length);
-        for (let i = skip; i < top; i++) {
-            posts.push(photoPosts[i]);
-        }
         if (filterConfig) {
-            posts = posts.filter(obj => {
+            posts = photoPosts.filter(obj => {
                 if ((filterConfig.author && obj.author !== filterConfig.author) ||
-                    (filterConfig.date && obj.date !== filterConfig.date))
-                {
+                    (filterConfig.date && obj.createdAt.getTime() !== filterConfig.date.getTime())) {
                     return false;
                 }
 
                 if (filterConfig.tags) {
-                    for (let i = 0; i < filterConfig.tags.length; i++) {
-                        if (!obj.hashTags.includes(filterConfig.tags[i])) {
-                            return false;
-                        }
-                    }
+                    if (filterConfig.tags.every(tag => obj.hashTags.includes(tag)));
                 }
                 return true;
             });
         }
-        return posts;
+
+        top = Math.min(skip + top, photoPosts.length);
+        return posts.slice(skip, top);
     };
 
     /**
@@ -195,9 +189,9 @@ function runTests() {
     console.log(postsModule.getPhotoPosts(1, 1));
     console.log('get all posts of "Author 1"');
     console.log(postsModule.getPhotoPosts(0, photoPosts.length, {author: 'Author 1'}));
-    console.log('get all posts with date ' + new Date('2018-02-23T23:00:00') + ' from first 3 posts');
-    console.log(postsModule.getPhotoPosts(0, 3), {date: new Date('2018-02-23T23:00:00')});
-    console.log('get all posts with tag "two" from first 5 tags');
+    console.log('get first three posts with date ' + new Date('2018-02-23T23:00:00'));
+    console.log(postsModule.getPhotoPosts(0, 3, {date: new Date('2018-02-23T23:00:00')}));
+    console.log('get first five posts with tag "two"');
     console.log(postsModule.getPhotoPosts(0, 5, {tags: ['two']}));
 
     console.log('\n    getPhotoPosts');
