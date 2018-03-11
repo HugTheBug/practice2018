@@ -88,14 +88,6 @@ body {
     font-style: italic;
 }
 
-.btn-post {
-    float: left;
-    display: block;
-    height: 32px;
-    width: 32px;
-    margin-right: 5px;
-}
-
 .dropdown {
     float: left;
     overflow: hidden;
@@ -116,9 +108,8 @@ body {
     text-align: left;
 }
 
-.dropdown-content a img {
-    width: 20px;
-    height: 20px;
+.dropdown-content a i {
+    font-size: 20px;
     display: inline-block;
     float: left;
 }
@@ -127,10 +118,21 @@ body {
     display: block;
 }
 
-.image-post .star-counter {
+.btn-like {
+    float: left;
+    display: block;
+    margin-right: 5px;
+    font-size: 32px;
+}
+
+.font-32 {
+    font-size: 32px;
+}
+
+.star-counter {
     float: left;
     height: 32px;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
     vertical-align: middle;
     line-height: 32px;
