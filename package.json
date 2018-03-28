@@ -1,0 +1,22 @@
+{
+  "name": "practice2018",
+  "version": "1.0.0",
+  "description": "BSU 2018 practice",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HugTheBug/practice2018.git"
+  },
+  "author": "Denis Belov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HugTheBug/practice2018/issues"
+  },
+  "homepage": "https://github.com/HugTheBug/practice2018#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

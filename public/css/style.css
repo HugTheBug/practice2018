@@ -129,7 +129,11 @@ body {
     font-size: 32px;
 }
 
-.star-counter {
+.color-yellow {
+    color: yellow;
+}
+
+.like-counter {
     float: left;
     height: 32px;
     font-size: 24px;
@@ -141,6 +145,7 @@ body {
 
 .image-post .desc {
     margin-top: 5px;
+    white-space: pre;
 }
 
 .image-post .tags {
@@ -174,21 +179,31 @@ body {
     flex-direction: row;
 }
 
-#search-form input {
+form input {
     padding: 10px;
     font-size: 17px;
     border: 1px solid grey;
     background: white;
-    height: 20px;
-
 }
 
-#search-form button {
-    border: none;
-    cursor: pointer;
-    height: 42px;
-    background: #26a69a;
-    width: 10%;
+.sign-in {
+    width: 300px;
+    text-align: center;
+}
+
+.sign-in input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-post input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.edit-post textarea {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #search-tags {
@@ -223,6 +238,45 @@ body {
     font-weight: 700;
     text-align: center;
     flex-shrink: 0;
+}
+
+form .error {
+    color: red;
+    font-size: 17px;
+    font-weight: bold;
+    display: none;
+}
+
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto 15% auto;
+    border: 1px solid #888;
+    padding: 12px;
+}
+
+.close-button {
+    float: right;
+    font-size: 32px;
+}
+
+.show-modal {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-post {
+    width: 500px;
 }
 
 @media screen and (max-width: 600px) {
