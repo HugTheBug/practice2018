@@ -1,0 +1,169 @@
+{
+	"info": {
+		"_postman_id": "b7e50a23-476e-4850-8d70-cd37a74bbe8f",
+		"name": "General API requests",
+		"description": "Some basic requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:3000/posts/add",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"photoLink\":\"http://via.placeholder.com/350x150\",\"description\":\"asda\",\"hashTags\":[\"#b\"],\"createdAt\":\"2018-04-09T14:18:54.634Z\",\"author\":\"admin\",\"likes\":[]}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/posts/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"posts",
+						"add"
+					]
+				},
+				"description": "Send post to server"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/posts/post/0",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:3000/posts/post/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"posts",
+						"post",
+						"0"
+					]
+				},
+				"description": "Get post by id"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/posts/post/0",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "http://localhost:3000/posts/post/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"posts",
+						"post",
+						"0"
+					]
+				},
+				"description": "Delete post"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/posts/post/2",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"photoLink\":\"http://via.placeholder.com/350x150\",\"description\":\"new desc\",\"hashTags\":[\"#c\",\"#b\",\"#f\",\"#g\"]}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/posts/post/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"posts",
+						"post",
+						"2"
+					]
+				},
+				"description": "Edit post"
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:3000/posts",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "content",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "skip",
+							"value": "0",
+							"description": "numbers of posts to skip",
+							"type": "text"
+						},
+						{
+							"key": "number",
+							"value": "10",
+							"description": "number of posts to get",
+							"type": "text"
+						},
+						{
+							"key": "fliterConfig",
+							"value": "{}",
+							"description": "filters",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/posts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"posts"
+					]
+				},
+				"description": "Get first 10 requests"
+			},
+			"response": []
+		}
+	]
+}
