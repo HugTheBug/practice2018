@@ -9,6 +9,7 @@ router.route('/:params*').get((req, res) => res.sendFile(path.resolve(`public/${
 
 app.use('/users', usersModule);
 app.use('/posts', postsRouter);
+app.get('/public/images/:image', (req, res) => res.sendFile(path.resolve(`.${req.path}`)));
 app.use('/', router);
 
 
