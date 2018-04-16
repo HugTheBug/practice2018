@@ -1,4 +1,4 @@
-let dataModule = (function (photoPosts) {
+let postsModel = (function (photoPosts) {
     let self = {};
 
     /**
@@ -12,16 +12,16 @@ let dataModule = (function (photoPosts) {
      * @returns {Object[]} posts
      */
     self.getPhotoPosts =
-        function(skip = 0, top = 10, filterConfig = null, onsuccess = function () {}, onerror = function () {}) {
+        function(skip = 0, top = 10, filterConfig = null, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', 'posts');
         xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                onsuccess(JSON.parse(xhr.responseText));
+                callback(xhr.status, JSON.parse(xhr.responseText));
             }
             else {
-                onerror(xhr.status);
+                callback(xhr.status, null);
             }
         };
         xhr.send('skip=' + skip + '&number=' + top + '&filterConfig=' + JSON.stringify(filterConfig));
@@ -32,15 +32,15 @@ let dataModule = (function (photoPosts) {
      * @param {string} id id of the post
      * @returns {*} post
      */
-    self.getPhotoPost = function (id, onsuccess = function () {}, onerror = function () {}) {
+    self.getPhotoPost = function (id, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', 'posts/post/' + id);
         xhr.onload = function() {
             if (xhr.status === 200) {
-                onsuccess(JSON.parse(xhr.responseText));
+                callback(xhr.status, JSON.parse(xhr.responseText));
             }
             else {
-                onerror(xhr.status);
+                callback(xhr.status, null);
             }
         };
         xhr.send();
@@ -51,19 +51,18 @@ let dataModule = (function (photoPosts) {
      * @param {Object} photoPost new post
      * @returns {boolean} true if the post was added otherwise false
      */
-    self.addPhotoPost = function (photoPost, onsuccess = function () {}, onerror = function () {}) {
+    self.addPhotoPost = function (photoPost, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('POST', 'posts/add');
-        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                onsuccess(JSON.parse(xhr.responseText));
+                callback(xhr.status, JSON.parse(xhr.responseText));
             }
             else {
-                onerror(xhr.status);
+                callback(xhr.status, null);
             }
         };
-        xhr.send(JSON.stringify(photoPost));
+        xhr.send(photoPost);
     };
 
     /**
@@ -74,19 +73,13 @@ let dataModule = (function (photoPosts) {
      * @param {Object} photoPost contains new value for the post properties
      * @returns {boolean} true if the post was edited otherwise false
      */
-    self.editPhotoPost = function(id, photoPost, onsuccess = function () {}, onerror = function () {}) {
+    self.editPhotoPost = function(id, photoPost, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('PUT', 'posts/post/' + id);
-        xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
-            if (xhr.status === 200) {
-                onsuccess();
-            }
-            else {
-                onerror(xhr.status);
-            }
+            callback(xhr.status);
         };
-        xhr.send(JSON.stringify(photoPost));
+        xhr.send(photoPost);
     };
 
     /**
@@ -94,16 +87,11 @@ let dataModule = (function (photoPosts) {
      * @param {string} id id of the post to be removed
      * @returns {boolean} true if the post was removed otherwise false
      */
-    self.removePhotoPost = function(id, onsuccess = function () {}, onerror = function () {}) {
+    self.removePhotoPost = function(id, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('DELETE', 'posts/post/' + id);
         xhr.onload = function() {
-            if (xhr.status === 200) {
-                onsuccess();
-            }
-            else {
-                onerror(xhr.status);
-            }
+            callback(xhr.status);
         };
         xhr.send();
     };
@@ -112,7 +100,7 @@ let dataModule = (function (photoPosts) {
 
 })();
 
-let domModule = (function() {
+let postsView = (function() {
     let self = {};
     self.displayedPosts = 0;
 
@@ -125,7 +113,7 @@ let domModule = (function() {
         self.displayedPosts++;
         let container = document.getElementById('posts-container');
         if (self.displayedPosts === 1) {
-            container.innerHTML = getPostHTML(post);
+            container.insertNode(getPostHTML(post));
         } else {
             container.insertBefore(getPostHTML(post), container.firstElementChild);
         }
@@ -156,14 +144,14 @@ let domModule = (function() {
             </div>
             <img width="100%" src="${post.photoLink}"/>
             <div>
-                <i onclick="like('${post.id}')" class="material-icons btn-like ${post.likes.includes(authModule.userName) ? `color-yellow">star` : `">star_border`}</i>
+                <i onclick="postController.like('${post.id}')" class="material-icons btn-like ${post.likes.includes(authController.userName) ? `color-yellow">star` : `">star_border`}</i>
                 <div class="like-counter">${post.likes.length}</div>
                 <div class="dropdown">
-                    ${authModule.userName === post.author ? `
+                    ${authController.userName === post.author ? `
                     <i class="material-icons btn-like">more_vert</i>
                     <div class="dropdown-content">
-                        <a onclick="showPostEditor('${post.id}')"><i class="material-icons">edit</i>Edit</a>
-                        <a onclick="removePhotoPost('${post.id}')"><i class="material-icons">close</i>Delete</a>
+                        <a onclick="postController.showPostEditor('${post.id}')"><i class="material-icons">edit</i>Edit</a>
+                        <a onclick="postController.removePhotoPost('${post.id}')"><i class="material-icons">close</i>Delete</a>
                     </div>` : ''}
                 </div>
             </div>
@@ -191,32 +179,29 @@ let domModule = (function() {
     self.displayHeader = function () {
         let ul = document.getElementById('header').firstElementChild;
         ul.innerHTML = `<li><a class="company-name">PhotoShare</a></li>
-        ${authModule.userName ? `<li class="right"><a onclick="signOut()" class="btn">Sign out</a></li>
-            <li class="right"><a onclick="showPostEditor()" id="add-post-btn" class="btn">Add New Photo</a></li>
-            <li class="right"><a id="user-name">${authModule.userName}</a></li>` :
-            `<li class="right"><a onclick="showSignIn()" class="btn">Sign in</a></li>`}`;
+        ${authController.userName ? `<li class="right"><a onclick="postController.signOut()" class="btn">Sign out</a></li>
+            <li class="right"><a onclick="postController.showPostEditor()" id="add-post-btn" class="btn">Add New Photo</a></li>
+            <li class="right"><a id="user-name">${authController.userName}</a></li>` :
+            `<li class="right"><a onclick="postController.showSignIn()" class="btn">Sign in</a></li>`}`;
     };
 
     return self;
 })();
 
 
-let authModule = (function () {
+let authController = (function () {
     let self = {};
 
     self.userName = '';
 
-    self.signIn = function (name, password, onsuccess = function () {}, onerror = function () {}) {
+    self.signIn = function (name, password, callback = function () {}) {
         let xhr = new XMLHttpRequest();
         xhr.open('GET', 'users?' + 'name=' + name + '&password=' + password);
         xhr.onload = function() {
             if (xhr.status === 200) {
                 self.userName = name;
-                onsuccess();
             }
-            else {
-                onerror(xhr.status);
-            }
+            callback(xhr.status);
         };
         xhr.send();
     };
@@ -228,191 +213,203 @@ let authModule = (function () {
     return self;
 })();
 
-function like(id) {
-    if (authModule.userName) {
-        let button = document.getElementById('post-' + id).getElementsByClassName('btn-like')[0];
-        dataModule.getPhotoPost(
-            id,
-            function (post) {
-                let likes = post.likes;
-                let counter = document.getElementById('post-' + id).getElementsByClassName('like-counter')[0];
-                if (button.innerHTML === 'star') {
-                    button.innerHTML = 'star_border';
-                    button.classList.remove('color-yellow');
-                    let index = likes.indexOf(authModule.userName);
-                    if (index !== -1) {
-                        likes.splice(index, 1);
+let postController =  (function () {
+    let self = {};
+
+    self.like = function(id) {
+        if (authController.userName) {
+            let button = document.getElementById('post-' + id).getElementsByClassName('btn-like')[0];
+            postsModel.getPhotoPost(
+                id,
+                function (status, post) {
+                    if (status === 200) {
+                        let likes = post.likes;
+                        let counter = document.getElementById('post-' + id).getElementsByClassName('like-counter')[0];
+                        if (button.innerHTML === 'star') {
+                            button.innerHTML = 'star_border';
+                            button.classList.remove('color-yellow');
+                            let index = likes.indexOf(authController.userName);
+                            if (index !== -1) {
+                                likes.splice(index, 1);
+                            }
+
+                        } else {
+                            button.innerHTML = 'star';
+                            button.classList.add('color-yellow');
+                            likes.push(authController.userName);
+                        }
+                        counter.innerHTML = likes.length;
+                        postsModel.editPhotoPost(id, {likes: likes});
                     }
-
-                } else {
-                    button.innerHTML = 'star';
-                    button.classList.add('color-yellow');
-                    likes.push(authModule.userName);
-                }
-                counter.innerHTML = likes.length;
-                dataModule.editPhotoPost(id, {likes: likes});
-            });
-    }
-}
-
-function showMore() {
-    let button = document.getElementById('btn-more');
-    button.style.display = 'inline-block';
-
-    dataModule.getPhotoPosts(
-        domModule.displayedPosts,
-        10,
-        currentFilter,
-        function (posts) {
-            if (posts.length < 10) {
-                button.style.display = 'none';
-            }
-            domModule.displayPosts(posts);
-            let container = document.getElementById('posts-container');
-            if (container.childElementCount === 0) {
-                container.innerHTML = '<h1>No posts found</h1>';
-            }
-        });
-}
-
-function removePhotoPost(id) {
-    dataModule.removePhotoPost(
-        id,
-        function () {
-            domModule.removePhotoPost(id);
-        });
-}
-
-function toggleModal(id) {
-    document.querySelector(id).classList.toggle("show-modal");
-}
-
-function signOut() {
-    authModule.signOut();
-    domModule.clearPosts();
-    domModule.displayHeader();
-    showMore();
-}
-
-function showSignIn() {
-    document.querySelector('.sign-in .error').style.display = 'none';
-    toggleModal('#sign-modal');
-}
-
-function signIn() {
-    let data = new FormData(document.querySelector('.sign-in'));
-    authModule.signIn(
-        data.get('name'),
-        data.get('password'),
-        function () {
-            toggleModal('#sign-modal');
-            domModule.clearPosts();
-            domModule.displayHeader();
-            showMore();
-        },
-        function () {
-            document.querySelector('.sign-in .error').style.display = 'inline-block';
-        });
-}
-
-function showPostEditor(id) {
-    if (id) {
-        dataModule.getPhotoPost(
-            id,
-            function (post) {
-                let modal = document.getElementById("edit-modal");
-                modal.innerHTML = `<form class="modal-content edit-post">
-                <label class="error">Incorrect input</label>
-                <i onclick="toggleModal('#edit-modal')" class="close-button material-icons">close</i>
-
-                <input type="hidden" name="id" value="${id}"/>
-                <input type="url" maxlength="256" name="link" placeholder="Photo link" value="${post.photoLink}"/>
-                <textarea rows="5" name="description" placeholder="Photo description">${post.description}</textarea>
-                <textarea rows="3" name="hashtags" placeholder="Hash tags">${post.hashTags.join(' ')}</textarea>
-                <a onclick="submitPost()" class="btn">Save post</a>
-                </form>`;
-                toggleModal("#edit-modal");
-            });
-    } else {
-        let modal = document.getElementById("edit-modal");
-        modal.innerHTML = `<form class="modal-content edit-post">
-                <label class="error">Incorrect input</label>
-                <i onclick="toggleModal('#edit-modal')" class="close-button material-icons">close</i>
-
-                <input type="hidden" name="id"/>
-                <input type="url" maxlength="64" name="link" placeholder="Photo link"/>
-                <textarea rows="5" name="description" placeholder="Photo description"></textarea>
-                <textarea rows="3" name="hashtags" placeholder="Hash tags"></textarea>
-                <a onclick="submitPost()" class="btn">Save post</a>
-                </form>`;
-        toggleModal("#edit-modal");
-    }
-
-}
-
-function submitPost() {
-    if (authModule.userName) {
-        let data = new FormData(document.querySelector('.edit-post'));
-        let post = {
-            id: data.get('id'),
-            photoLink: data.get('link'),
-            description: data.get('description'),
-            hashTags: data.get('hashtags').match(/#\w+/g),
-        };
-        if (post.id) {
-            dataModule.editPhotoPost(
-                post.id,
-                post,
-                function () {
-                    toggleModal("#edit-modal");
-                    dataModule.getPhotoPost(
-                        post.id,
-                        function (post) {
-                            domModule.editPhotoPost(post.id, post);
-                        });
-                },
-                function () {
-                    document.querySelector('.edit-post .error').style.display = 'inline-block';
-                });
-        } else {
-            post.createdAt = new Date();
-            post.author = authModule.userName;
-            post.likes = [];
-            dataModule.addPhotoPost(
-                post,
-                function (id) {
-                    toggleModal("#edit-modal");
-                    dataModule.getPhotoPost(
-                        id,
-                        function (post) {
-                            domModule.displayNewPost(post);
-                        });
-                },
-                function () {
-                    document.querySelector('.edit-post .error').style.display = 'inline-block';
                 });
         }
-    }
-}
-
-function searchPosts() {
-    let data = new FormData(document.querySelector('#search-form'));
-    currentFilter = {
-        author: data.get('author'),
-        date: data.get('date'),
-        tags: data.get('hashtags').match(/#\w+/g)
     };
-    if (currentFilter.date) {
-        currentFilter.date = new Date(currentFilter.date);
-    }
-    domModule.clearPosts();
-    showMore();
-}
+
+    self.showMore = function() {
+        let button = document.getElementById('btn-more');
+        button.style.display = 'inline-block';
+
+        postsModel.getPhotoPosts(
+            postsView.displayedPosts,
+            10,
+            currentFilter,
+            function (status, posts) {
+                if (status === 200) {
+                    if (posts.length < 10) {
+                        button.style.display = 'none';
+                    }
+                    postsView.displayPosts(posts);
+                    let container = document.getElementById('posts-container');
+                    if (container.childElementCount === 0) {
+                        container.innerHTML = '<h1>No posts found</h1>';
+                    }
+                }
+            });
+    };
+
+    self.removePhotoPost = function(id) {
+        postsModel.removePhotoPost(
+            id,
+            function (status) {
+                if (status === 200)
+                    postsView.removePhotoPost(id);
+            });
+    };
+
+    self.toggleModal = function (id) {
+        document.querySelector(id).classList.toggle("show-modal");
+    };
+
+    self.signOut = function() {
+        authController.signOut();
+        postsView.clearPosts();
+        postsView.displayHeader();
+        self.showMore();
+    };
+
+    self.showSignIn = function() {
+        document.querySelector('.sign-in .error').style.display = 'none';
+        self.toggleModal('#sign-modal');
+    };
+
+    self.signIn = function() {
+        let data = new FormData(document.querySelector('.sign-in'));
+        authController.signIn(
+            data.get('name'),
+            data.get('password'),
+            function (status) {
+                if (status === 200) {
+                    self.toggleModal('#sign-modal');
+                    postsView.clearPosts();
+                    postsView.displayHeader();
+                    self.showMore();
+                } else {
+                    document.querySelector('.sign-in .error').style.display = 'inline-block';
+                }
+            });
+    };
+
+    self.showPostEditor = function(id) {
+        if (id) {
+            postsModel.getPhotoPost(
+                id,
+                function (status, post) {
+                    if (status === 200) {
+                        let modal = document.getElementById("edit-modal");
+                        modal.innerHTML = `<form class="modal-content edit-post">
+                        <label class="error">Incorrect input</label>
+                        <i onclick="postController.toggleModal('#edit-modal')" class="close-button material-icons">close</i>
+
+                        <input type="hidden" name="id" value="${id}"/>
+                        <input type="file" id="photo" name="photo" accept="image/*" multiple>
+                        <textarea rows="5" name="description" placeholder="Photo description">${post.description}</textarea>
+                        <textarea rows="3" name="hashTags" placeholder="Hash tags">${post.hashTags.join(' ')}</textarea>
+                        <a onclick="postController.submitPost()" class="btn">Save post</a>
+                        </form>`;
+                        self.toggleModal("#edit-modal");
+                    }
+                });
+        } else {
+            let modal = document.getElementById("edit-modal");
+            modal.innerHTML = `<form class="modal-content edit-post">
+                <label class="error">Incorrect input</label>
+                <i onclick="postController.toggleModal('#edit-modal')" class="close-button material-icons">close</i>
+
+                <input type="hidden" name="id"/>
+                <input type="file" id="photo" name="photo" accept="image/*" multiple>
+                <textarea rows="5" name="description" placeholder="Photo description"></textarea>
+                <textarea rows="3" name="hashTags" placeholder="Hash tags"></textarea>
+                <a onclick="postController.submitPost()" class="btn">Save post</a>
+                </form>`;
+            self.toggleModal("#edit-modal");
+        }
+
+    };
+
+    self.submitPost = function() {
+        if (authController.userName) {
+            let data = new FormData(document.querySelector('.edit-post'));
+            let id = data.get('id');
+            if (id) {
+                postsModel.editPhotoPost(
+                    id,
+                    data,
+                    function (status) {
+                        if (status === 200) {
+                            self.toggleModal("#edit-modal");
+                            postsModel.getPhotoPost(
+                                id,
+                                function (status, post) {
+                                    postsView.editPhotoPost(post.id, post);
+                                });
+                        } else {
+                            document.querySelector('.edit-post .error').style.display = 'inline-block';
+                        }
+                    });
+            } else {
+                data.append("createdAt", new Date());
+                data.append("author", authController.userName);
+
+                postsModel.addPhotoPost(
+                    data,
+                    function (status, id) {
+                        if (status === 200) {
+                            self.toggleModal("#edit-modal");
+                            postsModel.getPhotoPost(
+                                id,
+                                function (status, post) {
+                                    postsView.displayNewPost(post);
+                                });
+                        } else {
+                            document.querySelector('.edit-post .error').style.display = 'inline-block';
+                        }
+                    });
+            }
+        }
+    };
+
+    self.searchPosts = function() {
+            let data = new FormData(document.querySelector('#search-form'));
+            currentFilter = {
+                author: data.get('author'),
+                date: data.get('date'),
+                tags: data.get('hashtags').match(/#\w+/g)
+            };
+            if (currentFilter.date) {
+                currentFilter.date = new Date(currentFilter.date);
+            }
+            postsView.clearPosts();
+            self.showMore();
+        };
+
+    return self;
+})();
+
 
 window.onload = function() {
     window.currentFilter = {};
-    domModule.displayHeader();
-    showMore();
+    postsView.displayHeader();
+    postController.showMore();
 };
 
 
